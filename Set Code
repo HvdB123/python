@@ -1,0 +1,115 @@
+import random
+
+#klasse van kaarten:
+class Kaart:
+    def __init__(self, kleur, symbool, aantal, vulling):
+        self.kleur = kleur
+        self.symbool = symbool
+        self.aantal = aantal
+        self.vulling = vulling
+
+    def __eq__(self, other):
+        return (self.kleur == other.kleur and
+                self.symbool == other.symbool and
+                self.aantal == other.aantal and
+                self.vulling == other.vulling)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    
+    def __hash__(self):
+        return hash((self.kleur, self.symbool, self.aantal, self.vulling))
+    
+    def test_kaart(self): #functie om deze klassen te testen
+        # vergelijk kaart 1 en 2
+        print(kaart1 == kaart2) # moet True zijn
+        print(kaart1 != kaart2) # moet False zijn
+
+        # vergelijk kaart 1 en 3
+        print(kaart1 == kaart3) # moet False zijn
+        print(kaart1 != kaart3) # moet True zijn
+
+
+# Test om klasse te testen
+kaart1 = Kaart("paars", "ovaal", 2, "vol")
+kaart2 = Kaart("paars", "ovaal", 2, "vol")
+kaart3 = Kaart("groen", "ovaal", 1, "leeg")
+kaart1.test_kaart()
+
+    
+#klasse van een deck
+class Deck:
+    def __init__(self):
+        self.kleuren = ["groen", "rood", "paars"] # de mogelijke kleuren voor kaarten
+        self.symbolen = ["ovaal", "golf", "ruit"] # de mogelijke symbolen voor kaarten
+        self.aantallen = [1, 2, 3] # het aantal symbolen op een kaart
+        self.vullingen = ["vol", "gestreept" "leeg"] # de vulling van de symbolen op een kaart
+        self.kaarten = self.maak_deck() # een lijst van alle kaarten in het deck
+
+    def maak_deck(self): #maakt een lijst van alle kaarten, die geschud zijn
+        kaarten = []
+        for kleur in self.kleuren:
+            for symbool in self.symbolen:
+                for aantal in self.aantallen:
+                    for vulling in self.vullingen:
+                        kaarten.append(Kaart(kleur, symbool, aantal, vulling))
+        random.shuffle(kaarten)
+        return kaarten
+
+#test voor klasse Deck
+def test_deck():
+    deck = Deck()
+    # Controleer of de lengte van het deck correct is
+    verwachte_lengte = len(deck.kleuren) * len(deck.symbolen) * len(deck.aantallen) * len(deck.vullingen)
+    assert len(deck.kaarten) == verwachte_lengte
+    # Controleer of alle kaarten in het deck uniek zijn
+    assert len(set(deck.kaarten)) == verwachte_lengte
+    # Controleer of het deck geschud is
+    assert deck.kaarten != Deck().kaarten
+    
+    if len(deck.kaarten) == verwachte_lengte and len(set(deck.kaarten)) == verwachte_lengte and deck.kaarten != Deck().kaarten:
+        print("De test is geslaagd")
+    else:
+        print("De test is mislukt") 
+test_deck()
+
+
+
+"""
+De volgende dingen moeten nog goed in klasses worden gezet :)
+"""
+
+
+#algoritme dat controleert of een gegeven verzameling een set is
+def is_het_een_set(kaarten):
+    if len(kaarten) != 3:
+        return False
+    kleur_bits = symbool_bits = aantal_bits = vulling_bits = 0
+    for kaart in kaarten:
+        kleur_bits |= 1 << kaart.kleur
+        symbool_bits |= 1 << kaart.symbool
+        aantal_bits |= 1 << kaart.aantal
+        vulling_bits |= 1 << kaart.vulling
+    return (kleur_bits & (kleur_bits - 1)) == 0 and \
+           (symbool_bits & (symbool_bits - 1)) == 0 and \
+           (aantal_bits & (aantal_bits - 1)) == 0 and \
+           (vulling_bits & (vulling_bits - 1)) == 0
+
+#algoritme om alle sets uit 12 kaarten te vinden
+def vind_alle_sets(kaarten):
+    sets = []
+    for i in range(len(kaarten)):
+        for j in range(i + 1, len(kaarten)):
+            for k in range(j + 1, len(kaarten)):
+                if is_het_een_set([kaarten[i], kaarten[j], kaarten[k]]):
+                    sets.append([kaarten[i], kaarten[j], kaarten[k]])
+    return sets
+
+#algoritme om één set te vinden
+def vind_één_set(kaarten):
+    for i in range(len(kaarten)):
+        for j in range(i + 1, len(kaarten)):
+            for k in range(j + 1, len(kaarten)):
+                if is_het_een_set([kaarten[i], kaarten[j], kaarten[k]]):
+                    return [kaarten[i], kaarten[j], kaarten[k]]
+    return None
